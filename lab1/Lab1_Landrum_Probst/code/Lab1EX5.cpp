@@ -1,3 +1,124 @@
+<<<<<<< HEAD
+// Christian Landrum & Wyatt Probst Exercise 5
+// g++ -std=c++11 -o Lab1EX5 Lab1EX5.cpp -lwiringPi
+
+#include <wiringPi.h>
+#include <softPwm.h>
+#include <stdio.h>
+#include <wiringPiI2C.h>
+#include <string.h>
+#include <iostream>
+#include <softPwm.h>
+#include <math.h>
+#include <stdlib.h>
+#include <ctime>
+#include <signal.h>
+#include <iomanip>
+#include <unistd.h>
+
+
+#define SERVO_MIN_MS 5
+#define SERVO_MAX_MS 25
+#define SERVO_MIN_ANGLE 0
+#define SERVO_MAX_ANGLE 180
+using namespace std;
+
+/* signal pin of the servo*/
+#define servoPin 1  
+
+int count = 0;
+bool reverse = false;
+
+//Specific a certain rotation angle (0-180) for the servo
+void servoWrite(int pin, int angle){ 
+    long time = 0;
+    time = 10* (0.5 + (float(angle) / 90)); /* map the desired angle to time*/
+    softPwmWrite(pin,time);   
+}
+
+
+/* Sefind your callback function to handout the pressing button interrupts. */
+void press_button() //Interrupt to see how many times button has been pressed for forward/reverse
+{
+    count +=1;
+    if (count % 2 == 0 ){
+        reverse = false;
+    }
+    else{
+        reverse = true;
+    }
+    
+
+}
+
+
+//This function is used to read data from ADS1015
+int adcVal(){
+
+	uint16_t low, high, value;
+	// Refer to the supplemental documents to find the parameters. In this lab, the ADS1015
+	// needs to be set in single conversion, single-end mode, and FSR (full-scale range)is 6.144
+    // you can choose any input pin (A0, A1, A2, A3) you like.
+	int adc = wiringPiI2CSetup(0x48);
+	wiringPiI2CWriteReg16(adc, 0x01, 0xC183);
+	usleep(1000);
+
+    // Read the configuration register to check the conversion status
+    uint16_t config = wiringPiI2CReadReg16(adc, 0x01);
+    if (config & 0x8000) { // Check if the OS bit (bit 15) is set to 1
+        // read the conversion result
+        uint16_t data = wiringPiI2CReadReg16(adc, 0x00);
+        low = (data & 0xFF00) >> 8;
+        high = (data & 0x00FF) << 8;
+        value = (high | low)>>4;
+    }
+	return value;
+}
+
+int main(void)
+{
+    int angle;
+    wiringPiSetup();    
+    softPwmCreate(servoPin,  0, 200); //Setup PWM on servo pin
+
+    
+
+
+
+    int adcNum;
+    int newAng;
+    wiringPiISR(4, INT_EDGE_RISING, &press_button);//Setup interrupt on pin 4 for button press
+    
+    while(1){
+
+        /* read ADS1015 value */
+        adcNum = adcVal();
+        
+        if (adcNum > 2048){ //Had some erratic values over 2048
+            adcNum = 0;
+        }
+        angle = (adcNum * 180) / 2047;  /* convert the obtained ADS1015 value to angle 0 - 180*/
+        if (reverse){ //Checks to see if button is pressed to change direction
+            newAng = 180-angle; 
+        }
+        else{ //If button not pressed, normal operation
+            newAng=angle;
+        }
+
+
+        /* use the angle to control the servo motor*/
+        servoWrite(1, newAng);
+
+        cout << newAng <<endl;
+        usleep(100000);
+        
+    }
+    
+    
+    return 0;
+}
+
+=======
 // Christian Landrum & Wyatt Probst Exercise 5
 // g++ -std=c++11 -o Lab1EX5 Lab1EX5.cpp -lwiringPi
 
@@ -117,3 +238,4 @@ int main(void)
     return 0;
 }
 
+>>>>>>> 993e3404eedf605b2519280edc623b3e0792715a
