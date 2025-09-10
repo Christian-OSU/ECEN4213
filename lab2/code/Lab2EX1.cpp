@@ -12,18 +12,22 @@ using namespace std::chrono;
 
 int main(){
 	//Set up wiringPi
+	int pin = 1;
 	wiringPiSetup();
-	
+	pinMode(pin, OUTPUT);
 	while(true){
 		/*Set the pinMode to output and generate a LOW-HIGH-LOW signal using "digitalWrite" to trigger the sensor. 
 		Use a 2 us delay between a LOW-HIGH and then a 5 us delay between HIGH-LOW. You can use
 		the function "usleep" to set the delay. The unit of usleep is microsecond. */
-		pinMode(1, OUTPUT);
-		digitalWrite(1, LOW);
+		pinMode(pin, OUTPUT);
+		digitalWrite(pin, LOW);
+		//cout << digitalRead(pin);
 		usleep(2);
-		digitalWrite(1,HIGH);
+		digitalWrite(pin,HIGH);
+		//cout << digitalRead(pin);
 		usleep(5);
-		digitalWrite(1,LOW);
+		digitalWrite(pin,LOW);
+		//cout << digitalRead(pin);
 	
 
 		/*Echo holdoff delay 750 us*/
@@ -31,8 +35,8 @@ int main(){
 
 
 		/*Switch the pinMode to input*/ 
-		pinMode(1, INPUT);
-		cout <<"Value: " << digitalRead(1) << endl;
+		pinMode(pin, INPUT);
+		//cout <<"Value: " << digitalRead(pin) << endl;
 		
 		
 		
@@ -42,9 +46,8 @@ int main(){
 		high_resolution_clock::time_point t1 = high_resolution_clock::now();
 		float pulse_width;
 		high_resolution_clock::time_point t2;
-		while(digitalRead(1))
+		while(digitalRead(pin) == HIGH)
 		{
-			cout << "running";
 			// 2. defind a varable to get the current time t2.
 			t2 = high_resolution_clock::now();
 			// 3. calculate the time duration: t2 - t1
@@ -58,11 +61,11 @@ int main(){
 
 
 		/*Calculate the distance by using the time duration that you just obtained.*/ //Speed of sound is 340m/s
-			float distance = pulse_width / .058;
+			float distance = pulse_width / 58;
 
 
 		/*Print the distance.*/
-			cout << distance;
+			cout << "Distance: " << distance << endl;
 
 
 		/*Delay before next measurement. The actual delay may be a little longer than what is shown is the datasheet.*/
