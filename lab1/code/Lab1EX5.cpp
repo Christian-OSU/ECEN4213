@@ -1,3 +1,4 @@
+// Christian Landrum & Wyatt Probst Exercise 5
 // g++ -std=c++11 -o Lab1EX5 Lab1EX5.cpp -lwiringPi
 
 #include <wiringPi.h>
