@@ -38,7 +38,7 @@ int motor_pin = 26;
 int pin = 1;
 float kp= 25; 
 float ki= 7; 
-float kd= 8000;
+float kd= 7;
 float cum_error = 0;
 float rate_error = 0;
 
@@ -91,7 +91,7 @@ void PID(float kp, float ki, float kd){
     //cout << "dis error: " << distance_error << endl;
     cum_error += distance_error * time_inter_ms * 0.001;
     //cout << "cum: " << cum_error << endl;
-    rate_error =(distance_error - distance_previous_error) / (time_inter_ms);
+    rate_error =(distance_error - distance_previous_error) / (time_inter_ms * 0.001);
     //cout << "rate error: " << rate_error << endl;
     /*calculate the proportional, integral and derivative output */
     
