@@ -34,10 +34,10 @@ float PID_p,  PID_d, PID_total, PID_i = 0;
 int time_inter_ms = 23; // time interval, you can use different time interval
 
 /*set your pin numbers and pid values*/
-int motor_pin = 23;
+int motor_pin = 26;
 int pin = 1;
 float kp= 25; 
-float ki= 5; 
+float ki= 7; 
 float kd= 8000;
 float cum_error = 0;
 float rate_error = 0;
@@ -68,7 +68,7 @@ int main(){
         cout<<"PID_i: "<<PID_i<<endl;
         cout<<"PID_d: "<<PID_d<<endl;
         cout<<"PID_total: "<<PID_total<<endl;
-        delay(200);
+        delay(1000);
 	}
 }
 
@@ -88,11 +88,11 @@ void PID(float kp, float ki, float kd){
     measured_value = read_sonar();
     /*calculate the distance error between the obj and measured distance */
     distance_error = measured_value - obj_value;
-    cout << "dis error: " << distance_error << endl;
+    //cout << "dis error: " << distance_error << endl;
     cum_error += distance_error * time_inter_ms * 0.001;
-    cout << "cum: " << cum_error << endl;
-    rate_error =(distance_error - distance_previous_error) / time_inter_ms * .001;
-    cout << "rate error: " << rate_error << endl;
+    //cout << "cum: " << cum_error << endl;
+    rate_error =(distance_error - distance_previous_error) / (time_inter_ms);
+    //cout << "rate error: " << rate_error << endl;
     /*calculate the proportional, integral and derivative output */
     
     PID_p = kp * distance_error;
@@ -106,6 +106,8 @@ void PID(float kp, float ki, float kd){
 
     /*use PID_total to control your fan*/
     //cout << "PID TOTAL: " << PID_total << endl;
+    if (PID_total < 0) PID_total = 0;
+    if (PID_total > 1024) PID_total = 1024;
     pwmWrite(motor_pin, PID_total);
     
 }
