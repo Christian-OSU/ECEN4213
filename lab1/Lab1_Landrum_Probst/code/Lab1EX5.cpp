@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // Christian Landrum & Wyatt Probst Exercise 5
 // g++ -std=c++11 -o Lab1EX5 Lab1EX5.cpp -lwiringPi
 
@@ -118,7 +117,6 @@ int main(void)
     return 0;
 }
 
-=======
 // Christian Landrum & Wyatt Probst Exercise 5
 // g++ -std=c++11 -o Lab1EX5 Lab1EX5.cpp -lwiringPi
 
@@ -238,4 +236,3 @@ int main(void)
     return 0;
 }
 
->>>>>>> 993e3404eedf605b2519280edc623b3e0792715a

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 //Christian Landrum & Wyatt Probst Exercise 3
 //The stator in the Stepper Motor we have supplied has 32 magnetic poles. Therefore, to complete
 // one full revolution requires 32 full steps. The rotor (or output shaft) of the Stepper 
@@ -98,7 +97,6 @@ int main(void){
     return 0;
 }
 
-=======
 //The stator in the Stepper Motor we have supplied has 32 magnetic poles. Therefore, to complete
 // one full revolution requires 32 full steps. The rotor (or output shaft) of the Stepper 
 //Motor is connected to a speed reduction set of gears and the reduction ratio is 1:64. Therefore, 
@@ -197,4 +195,3 @@ int main(void){
     return 0;
 }
 
->>>>>>> 993e3404eedf605b2519280edc623b3e0792715a
