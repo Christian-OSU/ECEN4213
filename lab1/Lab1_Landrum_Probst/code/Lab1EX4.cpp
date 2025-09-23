@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 
 #define SERVO_MIN_MS 5
