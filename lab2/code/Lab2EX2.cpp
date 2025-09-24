@@ -37,8 +37,8 @@ int time_inter_ms = 23; // time interval, you can use different time interval
 int motor_pin = 26;
 int pin = 1;
 float kp= 25; 
-float ki= 5; 
-float kd= 8000;
+float ki= 7; 
+float kd= 7;
 float cum_error = 0;
 float rate_error = 0;
 
@@ -68,7 +68,7 @@ int main(){
         cout<<"PID_i: "<<PID_i<<endl;
         cout<<"PID_d: "<<PID_d<<endl;
         cout<<"PID_total: "<<PID_total<<endl;
-        delay(200);
+        delay(1000);
 	}
 }
 
@@ -88,8 +88,11 @@ void PID(float kp, float ki, float kd){
     measured_value = read_sonar();
     /*calculate the distance error between the obj and measured distance */
     distance_error = measured_value - obj_value;
-    cum_error += distance_error * time_inter_ms;
-    rate_error =(distance_error - distance_previous_error) / time_inter_ms;
+    //cout << "dis error: " << distance_error << endl;
+    cum_error += distance_error * time_inter_ms * 0.001;
+    //cout << "cum: " << cum_error << endl;
+    rate_error =(distance_error - distance_previous_error) / (time_inter_ms * 0.001);
+    //cout << "rate error: " << rate_error << endl;
     /*calculate the proportional, integral and derivative output */
     
     PID_p = kp * distance_error;
@@ -103,6 +106,8 @@ void PID(float kp, float ki, float kd){
 
     /*use PID_total to control your fan*/
     //cout << "PID TOTAL: " << PID_total << endl;
+    if (PID_total < 0) PID_total = 0;
+    if (PID_total > 1024) PID_total = 1024;
     pwmWrite(motor_pin, PID_total);
     
 }
@@ -115,6 +120,9 @@ float read_sonar()
 		/*Set the pinMode to output and generate a LOW-HIGH-LOW signal using "digitalWrite" to trigger the sensor. 
 		Use a 2 us delay between a LOW-HIGH and then a 5 us delay between HIGH-LOW. You can use
 		the function "usleep" to set the delay. The unit of usleep is microsecond. */
+        high_resolution_clock::time_point t1;
+		float pulse_width;
+		high_resolution_clock::time_point t2;
 		pinMode(pin, OUTPUT);
 		digitalWrite(pin, LOW);
 		//cout << digitalRead(pin);
@@ -139,15 +147,17 @@ float read_sonar()
 		/*Get the time it takes for signal to leave sensor and come back.*/
 
 		// 1. defind a varable to get the current time t1. Refer to "High_Resolution_Clock_Reference.pdf" for more information
-		high_resolution_clock::time_point t1 = high_resolution_clock::now();
-		float pulse_width;
-		high_resolution_clock::time_point t2;
+        //while(digitalRead(pin) == LOW){
+            t1 = high_resolution_clock::now();
+        //}
+		
 		while(digitalRead(pin) == HIGH)
 		{
 			// 2. defind a varable to get the current time t2.
 			t2 = high_resolution_clock::now();
 			// 3. calculate the time duration: t2 - t1
 			pulse_width = chrono::duration_cast<chrono::microseconds>(t2 - t1).count();
+            //cout << "Pulse_Width: " << pulse_width << endl;
 			// 4. if the duration is larger than the Pulse Maxium 18.5ms, break the loop.
 			if (pulse_width > 18500) {
 				break;
@@ -161,12 +171,11 @@ float read_sonar()
 
 
 		/*Print the distance.*/
-			cout << "measured value: " << dist << endl;
+			//cout << "measured value: " << dist << endl;
 
 
 		/*Delay before next measurement. The actual delay may be a little longer than what is shown is the datasheet.*/
 
-			delay(200);
         }
         return dist;
         
@@ -183,7 +192,7 @@ float read_potentionmeter()
             adc = 0;
         }
         obj_value = ((adc * 80) / 2047) + 10; 
-        cout << "obj value: " << obj_value << endl;
+        //cout << "obj value: " << obj_value << endl;
 
     return obj_value;
 }
