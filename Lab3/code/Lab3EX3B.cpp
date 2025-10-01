@@ -17,6 +17,9 @@ using namespace std;
 
 int createSocket();
 
+int Horiz=0;
+int Vert=0;
+
 int sock = 0;
 
 int main(int argc, char const *argv[]){
@@ -34,8 +37,59 @@ int main(int argc, char const *argv[]){
 	createSocket();
 
 	while(true){
-
-		/*Sample the events from the joystick*/
+			
+			if (joystick.sample(&event))
+			{
+				if (event.isButton())
+				{
+					printf("isButton: %u | Value: %d\n", event.number, event.value);
+					/*Interpret the joystick input and use that input to move the Kobuki*/
+					if (event.number == 7 && event.value == 1){
+						//Start button
+					}
+					if (event.number == 8 && event.value == 1){
+						//Log button
+						
+					}
+	
+	
+	
+				}
+				if (event.isAxis())
+				{
+					printf("isAxis: %u | Value: %d\n", event.number, event.value);
+					/*Interpret the joystick input and use that input to move the Kobuki*/
+					if (event.number == 6){
+					
+						if (event.value == -32767){
+							//Left Dpad
+							Horiz=-1;
+						}
+						else if (event.value == 32767){
+							//Right Dpad
+							Horiz=1;
+						}
+						else{
+							//No Dpad
+							Horiz=0;
+						}
+					}
+					if (event.number == 7){
+						if (event.value == -32767){
+							//UP dpad
+							Vert=1;
+						}
+						else if (event.value == 32767){
+							//Down Dpad
+							Vert=-1;
+						}
+						else{
+							//No Dpad
+							Vert=0;
+						}
+					}
+				}
+			}
 
 		/*Convert the event to a useable data type so it can be sent*/
 
@@ -43,7 +97,7 @@ int main(int argc, char const *argv[]){
 
 		/*Send the data to the server*/
 
-		if(/**/) {
+		if() {
 		/*Closes out of all connections cleanly*/
 
 		//When you need to close out of the connection, please
@@ -56,6 +110,7 @@ int main(int argc, char const *argv[]){
 		/*Set a delay*/
 	}
 	return 0;
+}
 }
 
 //Creates the connection between the client and
@@ -75,7 +130,7 @@ int createSocket(){
 	serv_addr.sin_port   = htons(PORT);
 
 	/*Use the IP address of the server you are connecting to*/
-	if(inet_pton(AF_INET, "XX.XX.XX.XX" , &serv_addr.sin_addr) <= 0){
+	if(inet_pton(AF_INET, "XX.XX.XX.XX" , &serv_addr.sin_addr) <= 0){ //--------------------------------------------------------
 		printf("\nInvalid address/ Address not supported \n");
 		return -1;
 	}
