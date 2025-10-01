@@ -92,22 +92,26 @@ int main(int argc, char const *argv[]){
 			}
 
 		/*Convert the event to a useable data type so it can be sent*/
+		string message = to_string(Horiz) +","+ to_string(Vert);
 
 		/*Print the data stream to the terminal*/
+		printf(message.c_str());
 
 		/*Send the data to the server*/
+		send(sock, message.c_str(), message.length(), 0);
 
-		if() {
+		if(event.isButton() && event.number == 8 && event.value == 1) {
 		/*Closes out of all connections cleanly*/
 
 		//When you need to close out of the connection, please
 		//close TTP/IP data streams.
 		//Not doing so will result in the need to restart
 		//the raspberry pi and Kobuki
+			cout << "Closing Connections" << endl;
 			close(sock);
 			exit(0);
-
-		/*Set a delay*/
+			/*Set a delay*/
+			usleep(20000);
 	}
 	return 0;
 }
