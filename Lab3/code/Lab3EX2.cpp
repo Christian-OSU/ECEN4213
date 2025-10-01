@@ -23,6 +23,8 @@ int main(){
 	int r = 500; //Radius in mm
 	int b = 230; //Length between the center of the wheels in mm
 	int w = 2; //Rotation speed in rad/s
+	int current_rotation=0;
+	int current_speed=0;
 
 	//The joystick creates events when a button or axis changes value.
 	//Sample event from the joystick: joystick.sample(&event)
@@ -34,7 +36,6 @@ int main(){
 	//judge if the event is axis: event.isAxis()
 	//A number corresponding to the axis or button pressed: event.number
 	//And a value, Buttons: 0-unpressed, 1-pressed, Axis: -32767 to 0 to 32767: event.value
-
 	
 
 	while(true){
@@ -48,17 +49,20 @@ int main(){
 		//Right  - rotate the Kobuki 90 degrees clockwise
 		//Start  - immediately stop the Kobuki's movement
 		//Select - exit the script and close the Kobuki's connection cleanly
+		
 		if (joystick.sample(&event))
 		{
 			if (event.isButton())
 			{
 				printf("isButton: %u | Value: %d\n", event.number, event.value);
 				/*Interpret the joystick input and use that input to move the Kobuki*/
-				if (event.number == 7){
-					movement(0,0);
+				if (event.number == 7 && event.value == 1){
+					current_speed=0;
+					current_rotation=0;
 				}
-				if (event.number == 8){
+				if (event.number == 8 && event.value == 1){
 					serialClose(kobuki);
+					break;
 				}
 
 
@@ -68,23 +72,43 @@ int main(){
 			{
 				printf("isAxis: %u | Value: %d\n", event.number, event.value);
 				/*Interpret the joystick input and use that input to move the Kobuki*/
-				if (event.number == 6){
+				if (event.number == 6){//} && event.value == -32767){
+				
 					if (event.value == -32767){
 						for (int i=0; i <1; i++){
 							movement(w*b/2,1);
 							usleep(1150000);
-						}
-						printf("Moving left");
+						}/*
+						current_speed=200;
+						current_rotation=1;*/
+						
 					}
 					else if (event.value == 32767){
 						for (int i=0; i <1; i++){
 							movement(w*b/2,-1);
 							usleep(1150000);
-						}
-						printf("Moving right");
+						}/*
+						current_speed=200;
+						current_rotation=-1;*/
+						
 					}
 					else{
-						movement(100,1);
+						current_speed=0;
+						current_rotation=0;
+					}
+				}
+				if (event.number == 7){
+					if (event.value == -32767){
+						current_speed=200;
+						current_rotation=0;
+					}
+					else if (event.value == 32767){
+						current_speed=-200;
+						current_rotation=0;
+					}
+					else{
+						current_speed=0;
+						current_rotation=0;
 					}
 				}
 
@@ -92,7 +116,7 @@ int main(){
 				
 			}
 		}
-
+		movement(current_speed, current_rotation);
 	}
 
 	return 0;
