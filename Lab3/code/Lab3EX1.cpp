@@ -66,7 +66,7 @@ void movement(int sp, int r){
 	unsigned char b_1 = 0x55; /*Byte 1: Kobuki Header 1*/
 	unsigned char b_2 = 0x06; /*Byte 2: Length of Payload*/
 	unsigned char b_3 = 0x01; /*Byte 3: Sub-Payload Header (Base control)*/
-	unsigned char b_4 = 0x04; /*Byte 4: Length of Sub-Payload*/ //Not sure
+	unsigned char b_4 = 0x04; /*Byte 4: Length of Sub-Payload*/ 
 
 	unsigned char b_5 = sp & 0xff;	//Byte 5: Payload Data: Speed(mm/s)
 	unsigned char b_6 = (sp >> 8) & 0xff; //Byte 6: Payload Data: Speed(mm/s)

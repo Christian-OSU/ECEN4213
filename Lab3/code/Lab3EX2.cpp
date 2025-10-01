@@ -19,6 +19,11 @@ int main(){
 	JoystickEvent event;
 	unsigned int button;
 
+	int sp = 100; //Speed in mm/s
+	int r = 500; //Radius in mm
+	int b = 230; //Length between the center of the wheels in mm
+	int w = 2; //Rotation speed in rad/s
+
 	//The joystick creates events when a button or axis changes value.
 	//Sample event from the joystick: joystick.sample(&event)
 
@@ -29,6 +34,8 @@ int main(){
 	//judge if the event is axis: event.isAxis()
 	//A number corresponding to the axis or button pressed: event.number
 	//And a value, Buttons: 0-unpressed, 1-pressed, Axis: -32767 to 0 to 32767: event.value
+
+	
 
 	while(true){
 		/*Create a series of commands to interpret the
@@ -47,6 +54,13 @@ int main(){
 			{
 				printf("isButton: %u | Value: %d\n", event.number, event.value);
 				/*Interpret the joystick input and use that input to move the Kobuki*/
+				if (event.number == 7){
+					movement(0,0);
+				}
+				if (event.number == 8){
+					serialClose(kobuki);
+				}
+
 
 
 			}
@@ -54,6 +68,25 @@ int main(){
 			{
 				printf("isAxis: %u | Value: %d\n", event.number, event.value);
 				/*Interpret the joystick input and use that input to move the Kobuki*/
+				if (event.number == 6){
+					if (event.value == -32767){
+						for (int i=0; i <1; i++){
+							movement(w*b/2,1);
+							usleep(1150000);
+						}
+						printf("Moving left");
+					}
+					else if (event.value == 32767){
+						for (int i=0; i <1; i++){
+							movement(w*b/2,-1);
+							usleep(1150000);
+						}
+						printf("Moving right");
+					}
+					else{
+						movement(100,1);
+					}
+				}
 
 
 				
@@ -68,11 +101,11 @@ int main(){
 void movement(int sp, int r){
 
 	//Create the byte stream packet with the following format:
-	unsigned char b_0 = ; /*Byte 0: Kobuki Header 0*/
-	unsigned char b_1 = ; /*Byte 1: Kobuki Header 1*/
-	unsigned char b_2 = ; /*Byte 2: Length of Payload*/
-	unsigned char b_3 = ; /*Byte 3: Sub-Payload Header*/
-	unsigned char b_4 = ; /*Byte 4: Length of Sub-Payload*/
+	unsigned char b_0 = 0xAA; /*Byte 0: Kobuki Header 0*/
+	unsigned char b_1 = 0x55; /*Byte 1: Kobuki Header 1*/
+	unsigned char b_2 = 0x06; /*Byte 2: Length of Payload*/
+	unsigned char b_3 = 0x01; /*Byte 3: Sub-Payload Header (Base control)*/
+	unsigned char b_4 = 0x04; /*Byte 4: Length of Sub-Payload*/ 
 
 	unsigned char b_5 = sp & 0xff;	//Byte 5: Payload Data: Speed(mm/s)
 	unsigned char b_6 = (sp >> 8) & 0xff; //Byte 6: Payload Data: Speed(mm/s)
@@ -86,9 +119,25 @@ void movement(int sp, int r){
 		checksum ^= packet[i];
 
 	/*Send the data (Byte 1 - Byte 9) to Kobuki using serialPutchar (kobuki, );*/
+	serialPutchar(kobuki, b_0);
+	serialPutchar(kobuki, b_1);
+	serialPutchar(kobuki, b_2);
+	serialPutchar(kobuki, b_3);
+	serialPutchar(kobuki, b_4);
+	serialPutchar(kobuki, b_5);
+	serialPutchar(kobuki, b_6);
+	serialPutchar(kobuki, b_7);
+	serialPutchar(kobuki, b_8);
+	serialPutchar(kobuki, checksum);
 
 
 	/*Pause the script so the data send rate is the
 	same as the Kobuki data receive rate*/
+	usleep(20000);
 
+}
+
+void stopKobuki() {
+    movement(0, 0); // Send zero speed to stop
+    usleep(100000); // Wait for 100 ms to ensure the stop command is received
 }
