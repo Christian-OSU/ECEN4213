@@ -134,7 +134,7 @@ int createSocket(){
 	serv_addr.sin_port   = htons(PORT);
 
 	/*Use the IP address of the server you are connecting to*/
-	if(inet_pton(AF_INET, "XX.XX.XX.XX" , &serv_addr.sin_addr) <= 0){ //--------------------------------------------------------
+	if(inet_pton(AF_INET, "10.9.72.45" , &serv_addr.sin_addr) <= 0){ //--------------------------------------------------------
 		printf("\nInvalid address/ Address not supported \n");
 		return -1;
 	}
