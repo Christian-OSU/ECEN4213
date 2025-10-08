@@ -117,63 +117,63 @@ void createSocket(){
 	}
 }
 
-void readData(){
+void readData() {
     /*Read the incoming data stream from the controller*/
     char buffer[1024] = {0};
-    int valread = read(new_socket, buffer, 1024);
+    int valread = read(new_socket, buffer, sizeof(buffer));
+
     
-    /*Print the data to the terminal*/
+    /*Print the received data*/
     printf("Received: %s\n", buffer);
 
-    /*Parse the Horiz,Vert values*/
-    char *token = strtok(buffer, ",");
-    if (token != NULL) {
-        int horiz = atoi(token);
-        token = strtok(NULL, ",");
-        if (token != NULL) {
-            int vert = atoi(token);
-            
-            /*Convert to Kobuki movement parameters*/
-            int speed = 0;
-            int radius = 0;
-            
-            // Speed control (forward/backward)
-            if (vert > 0) {
-                speed = -100; // 
-            }
-			else if (vert < 0) {
-				speed = 100; // 
-			}
-			else {
-				speed = 0; // Stop
-			}
-            
-            // Turning control
-			if (horiz ==1 ){
-				radius = -500; // Turn right
-				speed = 150;
-			}
-			else if (horiz == -1){
-				radius = 500; // Turn left
-				speed = 150;
-			}
-             else {
-                radius = 0; // Go straight
-            }
-            
-            /*Use the received data to control the Kobuki*/
-            movement(speed, radius);
-        }
-    }
+    /*Parse the Horiz,Vert values (e.g., "1,-1")*/
+    int horiz = 0, vert = 0, stop = 0, shouldClose = 0;
+    sscanf(buffer, "%d,%d,%d,%d", &horiz, &vert, &stop, &shouldClose);
 
-    /*Check for shutdown command (will be an empty message when client disconnects)*/
-    if (valread == 0) {
+	/*Check if client disconnected*/
+    if (valread <= 0 || shouldClose == 1) {
         printf("Client disconnected\n");
         close(new_socket);
         serialClose(kobuki);
         exit(0);
     }
 
+
+    /*Convert to Kobuki movement parameters*/
+    int speed = 0;
+    int radius = 0;
+
+    // Speed control (forward/backward)
+    if (vert > 0) {
+        speed = -100;  // forward
+    } 
+    else if (vert < 0) {
+        speed = 100;   // backward
+    } 
+    else {
+        speed = 0;     // stop
+    }
+
+    // Turning control
+    if (horiz == 1) {
+        radius = -500; // turn right
+        speed = 150;
+    } 
+    else if (horiz == -1) {
+        radius = 500;  // turn left
+        speed = 150;
+    } 
+    else {
+        radius = 0;    // go straight
+    }
+	if (stop == 1) {
+		speed = 0;     // stop
+		radius = 0;    // go straight
+	}
+
+    /*Use the received data to control the Kobuki*/
+    movement(speed, radius);
+
     /*Reset the buffer*/
-    memset(&buffer, '0', sizeof(buffer));
+    memset(buffer, 0, sizeof(buffer));
 }
