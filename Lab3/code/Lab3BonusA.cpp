@@ -1,5 +1,5 @@
 
-//Use g++ -std=c++11 -o Lab3BonusA Lab3BonusA.cpp -lwiringPi
+//Use g++ -std=c++11 -o Lab3EX3ABonus Lab3EX3ABonus.cpp -lwiringPi
 
 #include <iostream>
 #include <iomanip>
@@ -26,7 +26,9 @@ int kobuki, new_socket;
 int main(){
 	//Initialize filestream for the Kobuki
 	wiringPiSetup();
-	kobuki = serialOpen("/dev/kobuki", 115200);
+	//kobuki = serialOpen("/dev/kobuki", 115200);
+	kobuki = serialOpen("/dev/ttyUSB0", 115200);
+
 
 	//Create connection to client
 	createSocket();
@@ -39,24 +41,42 @@ int main(){
 }
 
 void movement(int sp, int r){
+
 	//Create the byte stream packet with the following format:
-	/*Byte 0: Kobuki Header 0*/
-	/*Byte 1: Kobuki Header 1*/
-	/*Byte 2: Length of Payload*/
-	/*Byte 3: Payload Header*/
-	/*Byte 4: Payload Data: Length*/
-	/*Byte 5: Payload Data: Speed(mm/s)*/
-	/*Byte 6: Payload Data: Speed(mm/s)*/
-	/*Byte 7: Payload Data: Radius(mm)*/
-	/*Byte 8: Payload Data: Radius(mm)*/
-	/*Byte 9: Checksum*/
+	unsigned char b_0 = 0xAA; /*Byte 0: Kobuki Header 0*/
+	unsigned char b_1 = 0x55; /*Byte 1: Kobuki Header 1*/
+	unsigned char b_2 = 0x06; /*Byte 2: Length of Payload*/
+	unsigned char b_3 = 0x01; /*Byte 3: Sub-Payload Header (Base control)*/
+	unsigned char b_4 = 0x04; /*Byte 4: Length of Sub-Payload*/ 
 
-	/*Send the data to the Kobuki over a serial stream*/
+	unsigned char b_5 = sp & 0xff;	//Byte 5: Payload Data: Speed(mm/s)
+	unsigned char b_6 = (sp >> 8) & 0xff; //Byte 6: Payload Data: Speed(mm/s)
+	unsigned char b_7 = r & 0xff;	//Byte 7: Payload Data: Radius(mm)
+	unsigned char b_8 = (r >> 8) & 0xff;	//Byte 8: Payload Data: Radius(mm)
+	unsigned char checksum = 0;		//Byte 9: Checksum
+	
+	//Checksum all of the data
+	char packet[] = {b_0,b_1,b_2,b_3,b_4,b_5,b_6,b_7,b_8};
+	for (unsigned int i = 2; i < 9; i++)
+		checksum ^= packet[i];
 
-	/*Checksum all the data and send that as well*/
+	/*Send the data (Byte 1 - Byte 9) to Kobuki using serialPutchar (kobuki, );*/
+	serialPutchar(kobuki, b_0);
+	serialPutchar(kobuki, b_1);
+	serialPutchar(kobuki, b_2);
+	serialPutchar(kobuki, b_3);
+	serialPutchar(kobuki, b_4);
+	serialPutchar(kobuki, b_5);
+	serialPutchar(kobuki, b_6);
+	serialPutchar(kobuki, b_7);
+	serialPutchar(kobuki, b_8);
+	serialPutchar(kobuki, checksum);
+
 
 	/*Pause the script so the data send rate is the
-	same as the Kobuki receive rate*/
+	same as the Kobuki data receive rate*/
+	usleep(20000);
+
 }
 
 //Creates the connection between the client and
@@ -97,34 +117,48 @@ void createSocket(){
 	}
 }
 
-void readData(){
-	/*Read the incoming data stream from the controller*/
+void readData() {
+    /*Read the incoming data stream from the controller*/
+    char buffer[1024] = {0};
+    int valread = read(new_socket, buffer, sizeof(buffer));
+
+    
+    /*Print the received data*/
+    printf("Received: %s\n", buffer);
+
+    /*Parse the Horiz,Vert values (e.g., "1,-1")*/
+    int horiz = 0, vert = 0, stop = 0, shouldClose = 0;
+    sscanf(buffer, "%d,%d,%d,%d", &horiz, &vert, &stop, &shouldClose);
+
+	/*Check if client disconnected*/
+    if (valread <= 0 || shouldClose == 1) {
+        printf("Client disconnected\n");
+        close(new_socket);
+        serialClose(kobuki);
+        exit(0);
+    }
 
 
-	
-	/*Reset the buffer*/
-	memset(&/*buffer*/, '0', sizeof(/*buffer*/));
+    /*Convert to Kobuki movement parameters*/
+    int speed = 0;
+    int radius = 0;
 
-	/*Print the data to the terminal*/
+    
 
-
-	
-
-	/*Use the received data to control the Kobuki*/
-
-	
-	if(/**/) {
-	/*Closes out of all connections cleanly*/
-
-	//When you need to close out of all connections, please
-	//close both the Kobuki and TTP/IP data streams.
-	//Not doing so will result in the need to restart
-	//the raspberry pi and Kobuki
-		close(new_socket);
-		serialClose(kobuki);
-		exit(0);
+	if (stop == 1) {
+		speed = 0;     // stop
+		radius = 0;    // go straight
 	}
+	else {
+		// Speed control (forward/backward)
+    speed = (float(vert) / 32767) * 300 * -1;
+	radius = (float(horiz) / 32767) * 300 * -1;
+	}
+	cout << "Speed: " << speed << " Radius: " << radius << endl;
 
+    /*Use the received data to control the Kobuki*/
+    movement(speed, radius);
 
-
+    /*Reset the buffer*/
+    memset(buffer, 0, sizeof(buffer));
 }
