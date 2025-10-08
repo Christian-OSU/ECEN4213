@@ -13,7 +13,7 @@ int kobuki;
 int main(){
 	wiringPiSetup();
 
-	kobuki = serialOpen("/dev/kobuki", 115200);
+	kobuki = serialOpen("/dev/ttyUSB0", 115200);
 	if(kobuki != -1) std::cout << "Serial port opened" << std::endl;
 	
 	//The Kobuki accepts data packets at a rate of 20 ms.

@@ -1,3 +1,4 @@
+
 //Use g++ -std=c++11 -o Lab3EX3A Lab3EX3A.cpp -lwiringPi
 
 #include <iostream>
@@ -25,7 +26,9 @@ int kobuki, new_socket;
 int main(){
 	//Initialize filestream for the Kobuki
 	wiringPiSetup();
-	kobuki = serialOpen("/dev/kobuki", 115200);
+	//kobuki = serialOpen("/dev/kobuki", 115200);
+	kobuki = serialOpen("/dev/ttyUSB0", 115200);
+
 
 	//Create connection to client
 	createSocket();
@@ -135,23 +138,26 @@ void readData(){
             int radius = 0;
             
             // Speed control (forward/backward)
-            if (vert != 0) {
-                speed = vert * 200; // 200mm/s base speed
+            if (vert > 0) {
+                speed = -100; // 
             }
+			else if (vert < 0) {
+				speed = 100; // 
+			}
+			else {
+				speed = 0; // Stop
+			}
             
             // Turning control
-            if (horiz != 0) {
-                if (horiz == 1) {
-                    radius = 500;  // Turn right
-                } else {
-                    radius = -500; // Turn left
-                }
-                
-                // If we're not moving forward/backward but turning, add some speed
-                if (speed == 0) {
-                    speed = 150;
-                }
-            } else {
+			if (horiz ==1 ){
+				radius = -500; // Turn right
+				speed = 150;
+			}
+			else if (horiz == -1){
+				radius = 500; // Turn left
+				speed = 150;
+			}
+             else {
                 radius = 0; // Go straight
             }
             
