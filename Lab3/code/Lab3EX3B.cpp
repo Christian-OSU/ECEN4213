@@ -19,6 +19,8 @@ int createSocket();
 
 int Horiz=0;
 int Vert=0;
+int stop=0;
+int clse=0;
 
 int sock = 0;
 
@@ -44,12 +46,17 @@ int main(int argc, char const *argv[]){
 				{
 					printf("isButton: %u | Value: %d\n", event.number, event.value);
 					/*Interpret the joystick input and use that input to move the Kobuki*/
-					if (event.number == 7 && event.value == 1){
+					if (event.number == 9 && event.value == 1){
 						//Start button
+						stop = event.value;
+					}
+					else {
+						stop = 0;
 					}
 					if (event.number == 8 && event.value == 1){
 						//Log button
-						
+						cout << "closed" << endl;
+						clse = 1;
 					}
 	
 	
@@ -92,14 +99,18 @@ int main(int argc, char const *argv[]){
 			}
 
 		/*Convert the event to a useable data type so it can be sent*/
-		string message = to_string(Horiz) +","+ to_string(Vert);
+		string message = to_string(Horiz) +","+ to_string(Vert) + "," + to_string(stop) + "," + to_string(clse) + "\n";
 
 		/*Print the data stream to the terminal*/
 		//printf(message.c_str());
-		cout << Horiz << ", " << Vert << endl;
+		cout << Horiz << ", " << Vert << ", " << stop << ", " << clse << endl;
 
 		/*Send the data to the server*/
 		send(sock, message.c_str(), message.length(), 0);
+		if (clse ==1) {
+			close(sock);
+			exit(0);
+		}
 
 		if(event.isButton() && event.number == 8 && event.value == 1) {
 		/*Closes out of all connections cleanly*/
