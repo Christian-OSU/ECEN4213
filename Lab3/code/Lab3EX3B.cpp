@@ -19,6 +19,8 @@ int createSocket();
 
 int Horiz=0;
 int Vert=0;
+int stop=0;
+int clse=0;
 
 int sock = 0;
 
@@ -44,12 +46,17 @@ int main(int argc, char const *argv[]){
 				{
 					printf("isButton: %u | Value: %d\n", event.number, event.value);
 					/*Interpret the joystick input and use that input to move the Kobuki*/
-					if (event.number == 7 && event.value == 1){
+					if (event.number == 9 && event.value == 1){
 						//Start button
+						stop = event.value;
+					}
+					else {
+						stop = 0;
 					}
 					if (event.number == 8 && event.value == 1){
 						//Log button
-						
+						cout << "closed" << endl;
+						clse = 1;
 					}
 	
 	
@@ -59,7 +66,7 @@ int main(int argc, char const *argv[]){
 				{
 					printf("isAxis: %u | Value: %d\n", event.number, event.value);
 					/*Interpret the joystick input and use that input to move the Kobuki*/
-					if (event.number == 6){
+					if (event.number == 4){
 					
 						if (event.value == -32767){
 							//Left Dpad
@@ -74,14 +81,14 @@ int main(int argc, char const *argv[]){
 							Horiz=0;
 						}
 					}
-					if (event.number == 7){
+					if (event.number == 5){
 						if (event.value == -32767){
 							//UP dpad
-							Vert=1;
+							Vert=-1;
 						}
 						else if (event.value == 32767){
 							//Down Dpad
-							Vert=-1;
+							Vert=1;
 						}
 						else{
 							//No Dpad
@@ -92,13 +99,18 @@ int main(int argc, char const *argv[]){
 			}
 
 		/*Convert the event to a useable data type so it can be sent*/
-		string message = to_string(Horiz) +","+ to_string(Vert);
+		string message = to_string(Horiz) +","+ to_string(Vert) + "," + to_string(stop) + "," + to_string(clse) + "\n";
 
 		/*Print the data stream to the terminal*/
-		printf(message.c_str());
+		//printf(message.c_str());
+		cout << Horiz << ", " << Vert << ", " << stop << ", " << clse << endl;
 
 		/*Send the data to the server*/
 		send(sock, message.c_str(), message.length(), 0);
+		if (clse ==1) {
+			close(sock);
+			exit(0);
+		}
 
 		if(event.isButton() && event.number == 8 && event.value == 1) {
 		/*Closes out of all connections cleanly*/
@@ -112,9 +124,10 @@ int main(int argc, char const *argv[]){
 			exit(0);
 			/*Set a delay*/
 			usleep(20000);
+		}
+		usleep(10000);
 	}
 	return 0;
-}
 }
 
 //Creates the connection between the client and
@@ -134,7 +147,7 @@ int createSocket(){
 	serv_addr.sin_port   = htons(PORT);
 
 	/*Use the IP address of the server you are connecting to*/
-	if(inet_pton(AF_INET, "10.9.72.45" , &serv_addr.sin_addr) <= 0){ //--------------------------------------------------------
+	if(inet_pton(AF_INET, "10.227.49.112" , &serv_addr.sin_addr) <= 0){ //--------------------------------------------------------
 		printf("\nInvalid address/ Address not supported \n");
 		return -1;
 	}
@@ -145,4 +158,3 @@ int createSocket(){
 	}
 	return 0;
 }
-

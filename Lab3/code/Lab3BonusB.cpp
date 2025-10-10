@@ -1,6 +1,4 @@
-
-//Use g++ joystick.cc -std=c++11 -o Lab3BonusB Lab3BonusB.cpp
-
+//Use g++ joystick.cc -std=c++11 -o Lab3EX3B Lab3EX3B.cpp
 
 #include <stdio.h>
 #include <iostream>
@@ -19,12 +17,18 @@ using namespace std;
 
 int createSocket();
 
+int Horiz=0;
+int Vert=0;
+int stop=0;
+int clse=0;
+
 int sock = 0;
 
 int main(int argc, char const *argv[]){
 	
 	//Open the file stream for the joystick
 	Joystick joystick("/dev/input/js0");
+	JoystickEvent event;
 	if(!joystick.isFound()){
 		cout << "Error opening joystick" << endl;
 		exit(1);
@@ -35,30 +39,70 @@ int main(int argc, char const *argv[]){
 	createSocket();
 
 	while(true){
-
-		/*Sample the events from the joystick*/
+			
+			if (joystick.sample(&event))
+			{
+				if (event.isButton())
+				{
+					printf("isButton: %u | Value: %d\n", event.number, event.value);
+					/*Interpret the joystick input and use that input to move the Kobuki*/
+					if (event.number == 9 && event.value == 1){
+						//Start button
+						stop = event.value;
+					}
+					else {
+						stop = 0;
+					}
+					if (event.number == 8 && event.value == 1){
+						//Log button
+						cout << "closed" << endl;
+						clse = 1;
+					}
+	
+	
+	
+				}
+				if (event.isAxis())
+				{
+					printf("isAxis: %u | Value: %d\n", event.number, event.value);
+					/*Interpret the joystick input and use that input to move the Kobuki*/
+					if (event.number == 2){
+						Horiz = event.value;
+					}
+					if (event.number == 1){
+						Vert = event.value;
+					}
+				}
+			}
 
 		/*Convert the event to a useable data type so it can be sent*/
-		/*Scale the value to a range the Kobuki can handle
-		No more than 800mm/s*/
-		/*Scale the value of radius to a smaller max value
-		Max radius should be about 1 meter*/
+		string message = to_string(Horiz) +","+ to_string(Vert) + "," + to_string(stop) + "," + to_string(clse) + "\n";
 
 		/*Print the data stream to the terminal*/
+		//printf(message.c_str());
+		cout << Horiz << ", " << Vert << ", " << stop << ", " << clse << endl;
 
 		/*Send the data to the server*/
+		send(sock, message.c_str(), message.length(), 0);
+		if (clse ==1) {
+			close(sock);
+			exit(0);
+		}
 
-		if(/**/) {
+		if(event.isButton() && event.number == 8 && event.value == 1) {
 		/*Closes out of all connections cleanly*/
 
 		//When you need to close out of the connection, please
 		//close TTP/IP data streams.
 		//Not doing so will result in the need to restart
 		//the raspberry pi and Kobuki
+			cout << "Closing Connections" << endl;
 			close(sock);
 			exit(0);
-
-		/*Set a delay*/
+			/*Set a delay*/
+			usleep(20000);
+		}
+		usleep(10000);
 	}
 	return 0;
 }
@@ -80,7 +124,7 @@ int createSocket(){
 	serv_addr.sin_port   = htons(PORT);
 
 	/*Use the IP address of the server you are connecting to*/
-	if(inet_pton(AF_INET, "XX.XX.XX.XX" , &serv_addr.sin_addr) <= 0){
+	if(inet_pton(AF_INET, "10.227.49.112" , &serv_addr.sin_addr) <= 0){ //--------------------------------------------------------
 		printf("\nInvalid address/ Address not supported \n");
 		return -1;
 	}
@@ -91,4 +135,3 @@ int createSocket(){
 	}
 	return 0;
 }
-
