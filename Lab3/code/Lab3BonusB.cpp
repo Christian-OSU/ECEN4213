@@ -1,4 +1,4 @@
-//Use g++ joystick.cc -std=c++11 -o Lab3EX3B Lab3EX3B.cpp
+//Use g++ joystick.cc -std=c++11 -o Lab3BonusB Lab3BonusB.cpp
 
 #include <stdio.h>
 #include <iostream>

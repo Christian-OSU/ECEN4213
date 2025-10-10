@@ -1,5 +1,5 @@
 
-//Use g++ -std=c++11 -o Lab3EX3ABonus Lab3EX3ABonus.cpp -lwiringPi
+//Use g++ -std=c++11 -o Lab3BonusA Lab3BonusA.cpp -lwiringPi
 
 #include <iostream>
 #include <iomanip>
@@ -26,9 +26,7 @@ int kobuki, new_socket;
 int main(){
 	//Initialize filestream for the Kobuki
 	wiringPiSetup();
-	//kobuki = serialOpen("/dev/kobuki", 115200);
-	kobuki = serialOpen("/dev/ttyUSB0", 115200);
-
+	kobuki = serialOpen("/dev/kobuki", 115200);
 
 	//Create connection to client
 	createSocket();

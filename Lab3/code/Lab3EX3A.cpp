@@ -26,8 +26,7 @@ int kobuki, new_socket;
 int main(){
 	//Initialize filestream for the Kobuki
 	wiringPiSetup();
-	//kobuki = serialOpen("/dev/kobuki", 115200);
-	kobuki = serialOpen("/dev/ttyUSB0", 115200);
+	kobuki = serialOpen("/dev/kobuki", 115200);
 
 
 	//Create connection to client
