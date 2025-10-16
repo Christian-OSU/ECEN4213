@@ -1,3 +1,4 @@
+//Christian Landrum Wyatt Probst Group 5
 //Use g++ joystick.cc -std=c++11 -o Lab3EX2 Lab3EX2.cpp -lwiringPi
 
 #include <iostream>
@@ -165,3 +166,4 @@ void stopKobuki() {
     movement(0, 0); // Send zero speed to stop
     usleep(100000); // Wait for 100 ms to ensure the stop command is received
 }
+
