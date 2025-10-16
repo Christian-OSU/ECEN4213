@@ -1,3 +1,4 @@
+//Christian Landrum Wyatt Probst Group 5
 //Use g++ joystick.cc -std=c++11 -o Lab3BonusB Lab3BonusB.cpp
 
 #include <stdio.h>
