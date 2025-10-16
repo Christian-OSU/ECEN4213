@@ -1,4 +1,4 @@
-
+//Christian Landrum Wyatt Probst Group 5
 //Use g++ -std=c++11 -o Lab3BonusA Lab3BonusA.cpp -lwiringPi
 
 #include <iostream>
@@ -160,3 +160,4 @@ void readData() {
     /*Reset the buffer*/
     memset(buffer, 0, sizeof(buffer));
 }
+
