@@ -15,6 +15,10 @@ import zmq
 import socket
 from threading import Thread
 
+
+server_address = ('127.0.0.2',8001)
+client = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+
 class Camera(object):
     thread = None  # background thread that reads frames from camera
     frame = None  # current frame is stored here by background thread
@@ -38,7 +42,8 @@ class Camera(object):
     @classmethod
     def _thread(cls):
         with picamera.PiCamera() as camera:
-            # Camera setup: camera.resolution = (X,X)
+            # Camera setup: 
+            camera.resolution = (100,100)
 
             camera.hflip = True
             camera.vflip = True
@@ -69,7 +74,7 @@ def get_f():
     image = camera.get_frame()
     print(len(image))
     try:
-        # Send image to the server
+        client.sendto(image,server_address)
         pass
     except:
         print("something happened")

@@ -9,29 +9,37 @@ if (!!window.EventSource) {
       // finish the code to handle the bumper status
         if (bumper=="0")
           {
-            document.getElementById("but1").value = "OFF";
+            document.getElementById("bumpstatus").value = "OFF";
           }
         if (bumper=="1")
         {
-          document.getElementById("but1").value = "Right";
+          document.getElementById("bumpstatus").value = "ON";
         }
         
          
         
         // finish the code to handle the wheel drop status 
-      if (drop=="0")
+        if (drop=="0")
         {
-          document.getElementById("the id of button where you need to display the sensor status").value = "OFF";
+          document.getElementById("dropstatus").value = "OFF";
+
+        }
+        else
+        {
+          document.getElementById("dropstatus").value = "ON";
 
         }
       
 
       // finish the code to handle cliff status 
-      if (cliff=="0")
+        if (cliff=="0")
         {
-          document.getElementById("the id of button where you need to display the sensor status").value = "OFF";
+          document.getElementById("cliffstatus").value = "OFF";
         }
-      
+        if (cliff=="1")
+        {
+          document.getElementById("cliffstatus").value = "ON";
+        }
 
 
     }
