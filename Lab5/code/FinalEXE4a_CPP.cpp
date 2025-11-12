@@ -48,10 +48,20 @@ void read_socket(){
 		printf("received: %c\n",cmd);
 
 		// use cmd to control the robot movement
+			switch (cmd) {
+				case 'u': movement(150,0); break;
+				case 'd': movement(-150, 0); break;
+				case 'l': movement(100, 1); break;
+				case 'r': movement(100, -1); break;
+				case 'x': movement(0,0); break;
+				default: movement(0,0); break;
+			}
+			///usleep(20000);
 
 		
 		//clean the buffer with memset
-		
+		memset(buffer, 0, sizeof(buffer));
+
 	}
 	
 }

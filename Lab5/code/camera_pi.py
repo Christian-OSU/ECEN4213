@@ -45,8 +45,8 @@ class Camera(object):
             # Camera setup: 
             camera.resolution = (100,100)
 
-            camera.hflip = True
-            camera.vflip = True
+            camera.hflip = False
+            camera.vflip = False
 
             stream = io.BytesIO()
             for foo in camera.capture_continuous(stream, 'jpeg',
