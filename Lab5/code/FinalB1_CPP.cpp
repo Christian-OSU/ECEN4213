@@ -33,6 +33,9 @@ unsigned int bumper;
 unsigned int drop;
 unsigned int cliff;
 unsigned int button;
+char b;
+char c;
+char d;
 char cmd = 's';
 
 void readData();
@@ -41,25 +44,28 @@ int joystick_x(string); // this function can parse the received buffer and retur
 int joystick_y(string); // this function can parse the received buffer and return the speed value
 
 
-void read_socket(){
-	char buffer[100];
-	while(1){
-		read(sock , buffer, 50);
-		/*Print the data to the terminal*/
-		cmd = buffer[0];
-		printf("received: %c\n",cmd);
+void read_socket() {
+    char buffer[100];
 
-		// parse xpos and ypos from the buffer
+    while (true) {
+        memset(buffer, 0, sizeof(buffer));
 
+        int bytes = read(sock, buffer, sizeof(buffer) - 1);
 
-		// use xpos and ypos to control the robot movement
+        if (bytes <= 0)
+            continue;
 
-		
-		//clean the buffer
-		
-	}
-	
+        std::string msg(buffer);
+        cout << "Received: " << msg << endl;
+
+        // Convert to speed (sp) and rotation (r)
+        int sp = joystick_y(msg);   // forward/back speed
+        int r  = joystick_x(msg);   // turning radius
+
+        movement(sp, r);
+    }
 }
+
 
 int main(){
 	setenv("WIRINGPI_GPIOMEM", "1", 1);
@@ -72,16 +78,37 @@ int main(){
 	while(serialDataAvail(kobuki) != -1)
 	{
 		// Read the sensor data.
-
+		readData();
 
 		// Construct an string data like 'b0c0d0', you can use "sprintf" function. You can also define your own data protocal.
+		if (cliff >= 1 && cliff <= 11) {
+			c = '1';
+		}
+		else {
+			c = '0';
+		}
+		if (bumper >= 1 && bumper <= 10){
+			b = '1';
+		}
+		else {
+			b = '0';
+		}
 
+		if (drop >= 1 && drop <= 10) {
+			d = '1';
+		}
+		else {
+			d = '0';
+		}
+
+		sprintf(buffer, "b%cc%cd%c", b, c, d);
 
 		// Send the sensor data through the socket
-
+		send(sock, buffer, strlen(buffer), 0);
+		
 		// Clear the buffer
-
-		// You can refer to the code in previous labs. 
+		memset(buffer, 0, sizeof(buffer));
+		// You can refer to the code in previous labs.
 	}
 	serialClose(kobuki);
 	

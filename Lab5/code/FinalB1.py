@@ -30,8 +30,8 @@ connection, address = sock.accept()
 
 #Find the IP Address of your device
 #Use the 'ifconfig' terminal command, the address should be in the format  "XX.XXX.XXX.XXX"
-IP_Address = 'XX.XXX.XXX.XXX'
-PORT = 8080
+IP_Address = '10.227.13.115'
+PORT = 8000
 #Connect the *.html page to the server and run as the default page
 
 info = "2"
@@ -41,18 +41,19 @@ def index():
     if request.headers.get('accept') == 'text/event-stream':
         def events():
             for i, c in enumerate(itertools.cycle('\|/-')):
-                yield "data: %s\n\n" % ("b0c0d0")
+                yield f"data: {a}\n\n"
                 
         return Response(events(), content_type='text/event-stream')
     return render_template('FinalB1.html')
 
 
 def launch_socket_server(connection, address ):
-    global info, frame
+    global info, frame, a
     print('Listening...')
-    a='b0c0d0'
+    a = 'b0c0d0'
     while True:        
         info = connection.recv(6).decode("utf-8")
+        #print('info:', info)
         if info != a and len(info)>0:
             a = info
 
@@ -60,9 +61,11 @@ def launch_socket_server(connection, address ):
 
 def gen(camera):
     max_len = 65507
+    frame = ''
     while True:
         # receive image to the client: frame = .....
-        
+        frame,_ = sock_1.recvfrom(max_len)
+        max_len = 65507
         yield (b'--frame\r\n'
             b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 

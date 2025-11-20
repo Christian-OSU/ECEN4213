@@ -34,31 +34,69 @@ unsigned int bumper;
 unsigned int drop;
 unsigned int cliff;
 unsigned int button;
+char b;
+char c;
+char d;
 char cmd = 's';
 
 void readData();
 int speed(string); // this function can parse the received buffer and return the speed value
 int radius(string); // this function can parse the received buffer and return the radius value
 
-
 void read_socket(){
-	char buffer[100];
-	while(1){
-		read(sock , buffer, 50);
-		/*Print the data to the terminal*/
-		cmd = buffer[0];
-		printf("received: %c\n",cmd);
-		// parse sensor data from the buffer
-
-
-		// use the sensor data to control the robot movement
-
-		
-		//clean the buffer
-
-	}
-	
+    char buffer[256];
+    int x = 0, y = 0, z = 0;
+    
+    while(1){
+        int len = read(sock, buffer, sizeof(buffer)-1);
+        if(len > 0){
+            buffer[len] = '\0';
+            printf("received: %s\n", buffer);
+            
+            std::string data(buffer);
+            
+            // Simple parsing using sscanf-like approach
+            // Look for patterns like 'x': '123'
+            size_t pos;
+            
+            // Extract x
+            pos = data.find("'x': '");
+            if (pos != std::string::npos) {
+                x = atoi(data.c_str() + pos + 6);
+            }
+            
+            // Extract y
+            pos = data.find("'y': '");
+            if (pos != std::string::npos) {
+                y = atoi(data.c_str() + pos + 6);
+            }
+            
+            // Extract z
+            pos = data.find("'z': '");
+            if (pos != std::string::npos) {
+                z = atoi(data.c_str() + pos + 6);
+            }
+            
+            printf("x: %d, y: %d, z: %d\n", x, y, z);
+            
+            // Control robot based on phone orientation
+            // You can customize this logic
+			int r;
+            int sp = -x * 10;  // Use x for speed (beta - tilt forward/back)
+			if (y >= -5 && y <=5){
+				r=0;
+			}
+			else{
+				r = -(10000/(y));
+			}
+            //int r = (1/y) * 2;      // Use z for radius (alpha - rotation)
+            movement(sp, r);
+			printf("Speed: %d Radius: %d \n", sp, r);
+			
+        }
+    }
 }
+
 
 int main(){
 	setenv("WIRINGPI_GPIOMEM", "1", 1);
@@ -71,15 +109,35 @@ int main(){
 	while(serialDataAvail(kobuki) != -1)
 	{
 		// Read the sensor data.
-
+		readData();
 
 		// Construct an string data like 'b0c0d0', you can use "sprintf" function. You can also define your own data protocal.
+		if (cliff >= 1 && cliff <= 11) {
+			c = '1';
+		}
+		else {
+			c = '0';
+		}
+		if (bumper >= 1 && bumper <= 10){
+			b = '1';
+		}
+		else {
+			b = '0';
+		}
 
+		if (drop >= 1 && drop <= 10) {
+			d = '1';
+		}
+		else {
+			d = '0';
+		}
+
+		sprintf(buffer, "b%cc%cd%c", b, c, d);
 
 		// Send the sensor data through the socket
-
+		send(sock, buffer, strlen(buffer), 0);
 		// Clear the buffer
-
+		memset(buffer, 0, sizeof(buffer));
 		// You can refer to the code in previous labs. 
 	}
 	serialClose(kobuki);

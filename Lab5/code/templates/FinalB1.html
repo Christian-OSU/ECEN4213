@@ -13,7 +13,16 @@
     function(data) { }); return false; }); }); </script> 
 
     <!-- add four more functions for the left, right, down and stop buttons -->
-    <script type=text/javascript> $(function() { $("#button_id (change to corresponding button id in the D-pad)").click(function (event) { $.getJSON('/function_name (change to the function name used in the Python code)', { },
+    <script type=text/javascript> $(function() { $("#downbutton").click(function (event) { $.getJSON('/DownFunction', { },
+      function(data) { }); return false; }); }); </script> 
+
+    <script type=text/javascript> $(function() { $("#leftbutton").click(function (event) { $.getJSON('/LeftFunction', { },
+      function(data) { }); return false; }); }); </script> 
+
+    <script type=text/javascript> $(function() { $("#rightbutton").click(function (event) { $.getJSON('/RightFunction', { },
+      function(data) { }); return false; }); }); </script> 
+
+    <script type=text/javascript> $(function() { $("#stopbutton").click(function (event) { $.getJSON('/StopFunction', { },
       function(data) { }); return false; }); }); </script> 
 
 
@@ -34,16 +43,16 @@
 
       <!-- sensor status display module -->
       <div>
-        <input style="font-size:40;height:150; width:300;" type = "button" id = "disbutton" value = "Bumper" /> 
-        <input style="font-size:40;height:150; width:300;" type = "button" id = "disbutton" value = "WheelDrop" /> 
-        <input style="font-size:40;height:150; width:300;" type = "button" id = "disbutton" value = "Cliff" />
+        <input style="font-size:40;height:150; width:300;" type = "button" id = "bumpbutton" value = "Bumper" /> 
+        <input style="font-size:40;height:150; width:300;" type = "button" id = "dropbutton" value = "WheelDrop" /> 
+        <input style="font-size:40;height:150; width:300;" type = "button" id = "cliffbutton" value = "Cliff" />
       </div>
 
 
       <div>
-        <input style="font-size:40;height:150; width:300;" type = "button" id = "but1" value = "OFF" />
-        <input style="font-size:40;height:150; width:300;" type = "button" id = "but2" value = "OFF" />
-        <input style="font-size:40;height:150; width:300;" type = "button" id = "but3" value = "OFF" />
+        <input style="font-size:40;height:150; width:300;" type = "button" id = "bumpstatus" value = "OFF" />
+        <input style="font-size:40;height:150; width:300;" type = "button" id = "dropstatus" value = "OFF" />
+        <input style="font-size:40;height:150; width:300;" type = "button" id = "cliffstatus" value = "OFF" />
       </div>
 
       <hr>
@@ -64,14 +73,15 @@
               var xpos = joy.GetX();
 
               // todo: get the y axis position ypos
-    
+              var ypos = joy.GetY();
+
               const xhttp = new XMLHttpRequest();
     
               xhttp.open('POST', "/joydata",false);
               xhttp.setRequestHeader("Content-Type", "application/json");
 
               // todo: format xpos and ypos into a JSON message with the format: {"x": xpos, "y": ypos}
-              const json = {    };
+              const json = {"x": xpos, "y": ypos};
 
               xhttp.send(JSON.stringify(json));
           }

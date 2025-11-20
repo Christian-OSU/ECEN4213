@@ -1,0 +1,570 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ECEN4213 IoT - Robot Control</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        /* Video Section */
+        .video-container {
+            margin: 20px auto;
+            max-width: 90%;
+        }
+        
+        .video-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        hr {
+            margin: 30px 0;
+            border: none;
+            border-top: 2px solid #ddd;
+        }
+        
+        /* Mode Selector */
+        .mode-selector {
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+        
+        .mode-selector h2 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        
+        .mode-btn {
+            font-size: 20px;
+            padding: 15px 35px;
+            margin: 8px;
+            cursor: pointer;
+            border: 3px solid #2196F3;
+            background-color: white;
+            color: #2196F3;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .mode-btn.active {
+            background-color: #2196F3;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .mode-btn:hover {
+            background-color: #1976D2;
+            border-color: #1976D2;
+            color: white;
+        }
+        
+        /* Control Containers */
+        .control-container {
+            display: none;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+        
+        .control-container.active {
+            display: block;
+        }
+        
+        .control-container h2 {
+            color: #2196F3;
+            margin-top: 0;
+        }
+        
+        /* D-Pad Styles */
+        .dpad-container {
+            display: inline-block;
+            margin: 30px auto;
+        }
+        
+        .dpad-row {
+            text-align: center;
+            margin: 5px 0;
+        }
+        
+        .dpad-btn {
+            font-size: 35px;
+            height: 90px;
+            width: 90px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        
+        .dpad-btn:active {
+            background-color: #45a049;
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .dpad-btn.stop {
+            background-color: #f44336;
+        }
+        
+        /* Joystick Styles */
+        #joystick-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            background: linear-gradient(145deg, #e0e0e0, #f5f5f5);
+            border-radius: 50%;
+            margin: 30px auto;
+            border: 4px solid #999;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        #joystick {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, #2196F3, #1976D2);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: move;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: box-shadow 0.2s;
+        }
+        
+        #joystick:active {
+            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+        }
+        
+        .joystick-info {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #666;
+        }
+        
+        /* Phone Sensor Styles */
+        .phone-sensor {
+            padding: 20px;
+        }
+        
+        #start_demo {
+            font-size: 28px;
+            padding: 18px 50px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 20px 0;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        
+        #start_demo:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        #start_demo.btn-danger {
+            background-color: #f44336;
+        }
+        
+        #start_demo.btn-danger:hover {
+            background-color: #da190b;
+        }
+        
+        .orientation-data {
+            text-align: left;
+            display: inline-block;
+            font-size: 24px;
+            margin: 25px 0;
+            list-style: none;
+            padding: 0;
+        }
+        
+        .orientation-data li {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .orientation-data span {
+            font-weight: bold;
+            color: #2196F3;
+        }
+        
+        /* Sensor Status Styles */
+        .sensor-status {
+            margin: 30px auto;
+            padding: 25px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+        
+        .sensor-status h2 {
+            color: #FF9800;
+            margin-top: 0;
+        }
+        
+        .sensor-row {
+            margin: 15px 0;
+        }
+        
+        .sensor-btn {
+            font-size: 20px;
+            height: 70px;
+            width: 180px;
+            margin: 8px;
+            border: 3px solid #333;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .sensor-status-btn {
+            font-size: 22px;
+            height: 70px;
+            width: 180px;
+            margin: 8px;
+            border: 3px solid #333;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .sensor-status-btn.off {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        
+        .sensor-status-btn.on {
+            background-color: #f44336;
+            color: white;
+            border-color: #f44336;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <h1>ECEN4213 IoT - Robot Control Interface</h1>
+    
+    <!-- Live Video Stream -->
+    <div class="video-container">
+        <img src="{{ url_for('video_feed') }}" alt="Live Stream">
+    </div>
+    
+    <hr>
+    
+    <!-- Mode Selector -->
+    <div class="mode-selector">
+        <h2>Select Control Mode</h2>
+        <button class="mode-btn active" onclick="switchMode('dpad')">D-Pad Control</button>
+        <button class="mode-btn" onclick="switchMode('joystick')">Virtual Joystick</button>
+        <button class="mode-btn" onclick="switchMode('phone')">Phone Sensor</button>
+    </div>
+    
+    <!-- D-Pad Control -->
+    <div id="dpad-control" class="control-container active">
+        <h2>D-Pad Control</h2>
+        <p>Press and hold the directional buttons to move the robot</p>
+        <div class="dpad-container">
+            <div class="dpad-row">
+                <button class="dpad-btn" onmousedown="sendCommand('u')" onmouseup="sendCommand('x')" ontouchstart="sendCommand('u')" ontouchend="sendCommand('x')">▲</button>
+            </div>
+            <div class="dpad-row">
+                <button class="dpad-btn" onmousedown="sendCommand('l')" onmouseup="sendCommand('x')" ontouchstart="sendCommand('l')" ontouchend="sendCommand('x')">◄</button>
+                <button class="dpad-btn stop" onmousedown="sendCommand('x')">■</button>
+                <button class="dpad-btn" onmousedown="sendCommand('r')" onmouseup="sendCommand('x')" ontouchstart="sendCommand('r')" ontouchend="sendCommand('x')">►</button>
+            </div>
+            <div class="dpad-row">
+                <button class="dpad-btn" onmousedown="sendCommand('d')" onmouseup="sendCommand('x')" ontouchstart="sendCommand('d')" ontouchend="sendCommand('x')">▼</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Virtual Joystick Control -->
+    <div id="joystick-control" class="control-container">
+        <h2>Virtual Joystick Control</h2>
+        <p>Drag the blue circle to control the robot's movement</p>
+        <div id="joystick-container">
+            <div id="joystick"></div>
+        </div>
+        <div class="joystick-info">
+            <p>Release to stop the robot</p>
+        </div>
+    </div>
+    
+    <!-- Phone Sensor Control -->
+    <div id="phone-control" class="control-container">
+        <h2>Phone Sensor Control</h2>
+        <p>Tilt your phone to control the robot</p>
+        <div class="phone-sensor">
+            <button id="start_demo">Enable Phone Sensor</button>
+            <h3>Orientation Data</h3>
+            <ul class="orientation-data">
+                <li>X-axis (β): <span id="Orientation_b">0</span>°</li>
+                <li>Y-axis (γ): <span id="Orientation_g">0</span>°</li>
+                <li>Z-axis (α): <span id="Orientation_a">0</span>°</li>
+            </ul>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <!-- Sensor Status Display -->
+    <div class="sensor-status">
+        <h2>Robot Sensor Status</h2>
+        <div class="sensor-row">
+            <button class="sensor-btn">Bumper</button>
+            <button class="sensor-btn">Wheel Drop</button>
+            <button class="sensor-btn">Cliff</button>
+        </div>
+        <div class="sensor-row">
+            <button id="bumpstatus" class="sensor-status-btn off">OFF</button>
+            <button id="dropstatus" class="sensor-status-btn off">OFF</button>
+            <button id="cliffstatus" class="sensor-status-btn off">OFF</button>
+        </div>
+    </div>
+    
+    <script>
+        let currentMode = 'dpad';
+        let joystickActive = false;
+        let phoneActive = false;
+        
+        // ========== MODE SWITCHING ==========
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // Update button states
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Hide all controls
+            document.querySelectorAll('.control-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            
+            // Show selected control and stop others
+            if (mode === 'dpad') {
+                document.getElementById('dpad-control').classList.add('active');
+                stopPhoneSensor();
+            } else if (mode === 'joystick') {
+                document.getElementById('joystick-control').classList.add('active');
+                stopPhoneSensor();
+            } else if (mode === 'phone') {
+                document.getElementById('phone-control').classList.add('active');
+            }
+        }
+        
+        // ========== D-PAD CONTROL ==========
+        function sendCommand(cmd) {
+            const routes = {
+                'u': '/UpFunction',
+                'd': '/DownFunction',
+                'l': '/LeftFunction',
+                'r': '/RightFunction',
+                'x': '/StopFunction'
+            };
+            
+            if (routes[cmd]) {
+                fetch(routes[cmd])
+                    .then(response => console.log(`Command ${cmd} sent`))
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+        
+        // ========== VIRTUAL JOYSTICK ==========
+        const joystickContainer = document.getElementById('joystick-container');
+        const joystick = document.getElementById('joystick');
+        let joystickInterval;
+        
+        joystick.addEventListener('mousedown', startJoystick);
+        joystick.addEventListener('touchstart', startJoystick);
+        
+        function startJoystick(e) {
+            e.preventDefault();
+            joystickActive = true;
+            
+            document.addEventListener('mousemove', moveJoystick);
+            document.addEventListener('touchmove', moveJoystick);
+            document.addEventListener('mouseup', stopJoystick);
+            document.addEventListener('touchend', stopJoystick);
+            
+            joystickInterval = setInterval(sendJoystickData, 100);
+        }
+        
+        function moveJoystick(e) {
+            if (!joystickActive) return;
+            
+            const rect = joystickContainer.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            let clientX, clientY;
+            if (e.type.includes('touch')) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            let x = clientX - rect.left - centerX;
+            let y = clientY - rect.top - centerY;
+            
+            const distance = Math.sqrt(x * x + y * y);
+            const maxDistance = centerX - 50;
+            
+            if (distance > maxDistance) {
+                x = (x / distance) * maxDistance;
+                y = (y / distance) * maxDistance;
+            }
+            
+            joystick.style.left = (centerX + x) + 'px';
+            joystick.style.top = (centerY + y) + 'px';
+        }
+        
+        function sendJoystickData() {
+            const rect = joystickContainer.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const joystickRect = joystick.getBoundingClientRect();
+            const joystickCenterX = joystickRect.left + joystickRect.width / 2 - rect.left;
+            const joystickCenterY = joystickRect.top + joystickRect.height / 2 - rect.top;
+            
+            const x = joystickCenterX - centerX;
+            const y = -(joystickCenterY - centerY);
+            
+            if (Math.abs(x) < 30 && Math.abs(y) < 30) {
+                sendCommand('x');
+            } else if (Math.abs(y) > Math.abs(x)) {
+                sendCommand(y > 0 ? 'u' : 'd');
+            } else {
+                sendCommand(x > 0 ? 'r' : 'l');
+            }
+        }
+        
+        function stopJoystick() {
+            joystickActive = false;
+            document.removeEventListener('mousemove', moveJoystick);
+            document.removeEventListener('touchmove', moveJoystick);
+            document.removeEventListener('mouseup', stopJoystick);
+            document.removeEventListener('touchend', stopJoystick);
+            
+            clearInterval(joystickInterval);
+            
+            joystick.style.left = '50%';
+            joystick.style.top = '50%';
+            
+            sendCommand('x');
+        }
+        
+        // ========== PHONE SENSOR CONTROL ==========
+        let is_running = false;
+        let demo_button = document.getElementById("start_demo");
+        
+        demo_button.onclick = function(e) {
+            e.preventDefault();
+            
+            if (DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === "function") {
+                DeviceMotionEvent.requestPermission();
+            }
+            
+            if (is_running) {
+                stopPhoneSensor();
+            } else {
+                window.addEventListener("deviceorientation", handleOrientation);
+                demo_button.innerHTML = "Stop Phone Sensor";
+                demo_button.classList.add('btn-danger');
+                is_running = true;
+            }
+        };
+        
+        function stopPhoneSensor() {
+            if (is_running) {
+                window.removeEventListener("deviceorientation", handleOrientation);
+                demo_button.innerHTML = "Enable Phone Sensor";
+                demo_button.classList.remove('btn-danger');
+                
+                const xhttp2 = new XMLHttpRequest();
+                xhttp2.open('POST', "/phonedata", false);
+                xhttp2.setRequestHeader("Content-Type", "application/json");
+                const pjson = {"d": "p", "x": "0", "y": "0", "z": "0"};
+                xhttp2.send(JSON.stringify(pjson));
+                
+                is_running = false;
+            }
+        }
+        
+        function handleOrientation(event) {
+            updateFieldIfNotNull('Orientation_a', event.alpha);
+            updateFieldIfNotNull('Orientation_b', event.beta);
+            updateFieldIfNotNull('Orientation_g', event.gamma);
+        }
+        
+        function updateFieldIfNotNull(fieldName, value, precision=0) {
+            if (value != null)
+                document.getElementById(fieldName).innerHTML = value.toFixed(precision);
+        }
+        
+        function sendOrientation() {
+            if (!is_running) return;
+            
+            const xhttp2 = new XMLHttpRequest();
+            const alpha = parseInt(document.getElementById('Orientation_a').innerHTML);
+            const beta = parseInt(document.getElementById('Orientation_b').innerHTML);
+            const gamma = parseInt(document.getElementById('Orientation_g').innerHTML);
+            const pjson = {"d": "p", "x": String(beta), "y": String(gamma), "z": String(alpha)};
+            
+            xhttp2.open('POST', "/phonedata", false);
+            xhttp2.setRequestHeader("Content-Type", "application/json");
+            xhttp2.send(JSON.stringify(pjson));
+        }
+        
+        setInterval(sendOrientation, 500);
+    </script>
+</body>
+</html>
